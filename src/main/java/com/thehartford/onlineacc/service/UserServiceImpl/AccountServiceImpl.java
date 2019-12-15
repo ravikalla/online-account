@@ -1,6 +1,8 @@
 package com.thehartford.onlineacc.service.UserServiceImpl;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static com.thehartford.onlineacc.util.AppConstants.EXTERNAL_BANK_URL;
+import static com.thehartford.onlineacc.util.AppConstants.EXTERNAL_BANK_URL_DEPOSIT;
+import static com.thehartford.onlineacc.util.AppConstants.EXTERNAL_BANK_URL_WITHDRAW;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -15,7 +17,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.thehartford.onlineacc.controller.UserController;
 import com.thehartford.onlineacc.dao.PrimaryAccountDao;
 import com.thehartford.onlineacc.dao.SavingsAccountDao;
 import com.thehartford.onlineacc.domain.PrimaryAccount;
@@ -26,9 +27,6 @@ import com.thehartford.onlineacc.domain.User;
 import com.thehartford.onlineacc.service.AccountService;
 import com.thehartford.onlineacc.service.TransactionService;
 import com.thehartford.onlineacc.service.UserService;
-import com.thehartford.onlineacc.util.AppConstants;
-
-import static com.thehartford.onlineacc.util.AppConstants.*;
 @Service
 public class AccountServiceImpl implements AccountService {
 	private static final Logger L = LogManager.getLogger(AccountServiceImpl.class);
@@ -98,6 +96,7 @@ public class AccountServiceImpl implements AccountService {
     }
     
     public void deposit(String accountType, double amount, Principal principal) {
+    	L.debug("Start : AccountServiceImpl.deposit(...) : accountType = {}, amount = {}", accountType, amount);
         User user = userService.findByUsername(principal.getName());
 
         if (accountType.equalsIgnoreCase("Primary")) {
@@ -110,7 +109,7 @@ public class AccountServiceImpl implements AccountService {
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Deposit to Primary Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
             transactionService.savePrimaryDepositTransaction(primaryTransaction);
 
-            callBofaDeposit();
+            callBofaDeposit(amount);
             
         } else if (accountType.equalsIgnoreCase("Savings")) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
@@ -121,11 +120,13 @@ public class AccountServiceImpl implements AccountService {
             SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Deposit to savings Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
             transactionService.saveSavingsDepositTransaction(savingsTransaction);
 
-            callBofaDeposit();
+            callBofaDeposit(amount);
         }
+        L.debug("End : AccountServiceImpl.deposit(...) : accountType = {}, amount = {}", accountType, amount);
     }
 
     public void withdraw(String accountType, double amount, Principal principal) {
+    	L.debug("Start : AccountServiceImpl.withdraw(...) : accountType = {}, amount = {}", accountType, amount);
         User user = userService.findByUsername(principal.getName());
 
         if (accountType.equalsIgnoreCase("Primary")) {
@@ -137,7 +138,7 @@ public class AccountServiceImpl implements AccountService {
 
             PrimaryTransaction primaryTransaction = new PrimaryTransaction(date, "Withdraw from Primary Account", "Account", "Finished", amount, primaryAccount.getAccountBalance(), primaryAccount);
             transactionService.savePrimaryWithdrawTransaction(primaryTransaction);
-            callBofaWithdraw();
+            callBofaWithdraw(amount);
         } else if (accountType.equalsIgnoreCase("Savings")) {
             SavingsAccount savingsAccount = user.getSavingsAccount();
             savingsAccount.setAccountBalance(savingsAccount.getAccountBalance().subtract(new BigDecimal(amount)));
@@ -146,31 +147,38 @@ public class AccountServiceImpl implements AccountService {
             Date date = new Date();
             SavingsTransaction savingsTransaction = new SavingsTransaction(date, "Withdraw from savings Account", "Account", "Finished", amount, savingsAccount.getAccountBalance(), savingsAccount);
             transactionService.saveSavingsWithdrawTransaction(savingsTransaction);
-            callBofaWithdraw();
+            callBofaWithdraw(amount);
         }
+        L.debug("End : AccountServiceImpl.withdraw(...) : accountType = {}, amount = {}", accountType, amount);
     }
 
     private int accountGen() {
         return ++nextAccountNumber;
     }
 
-	private void callBofaDeposit() {
+	private void callBofaDeposit(double amount) {
+		L.debug("Start : AccountServiceImpl.callBofaDeposit() : amount = {}", amount);
 		try {
 			RestTemplate rest = new RestTemplate();
-			String quote = rest.getForObject(EXTERNAL_BANK_URL + EXTERNAL_BANK_URL_DEPOSIT, String.class);
-			L.info("bofa online deposit response: " + quote);
+			String strResponse = rest.getForObject(EXTERNAL_BANK_URL + EXTERNAL_BANK_URL_DEPOSIT + "/" + amount, String.class);
+			L.info("Bofa online deposit response: " + strResponse);
 		} catch (RestClientException e) {
-			L.error("Rest call to Bofa-online deposit service failed.");
+			L.error("Rest call to Bofa-online deposit service failed : RestClientException e = {}", e);
+			throw e;
 		}
+		L.debug("End : AccountServiceImpl.callBofaDeposit() : amount = {}", amount);
 	}
 
-	private void callBofaWithdraw() {
+	private void callBofaWithdraw(double amount) {
+		L.debug("Start : AccountServiceImpl.callBofaWithdraw(), amount = {}", amount);
 		try {
 			RestTemplate rest = new RestTemplate();
-			String str = rest.getForObject(EXTERNAL_BANK_URL + EXTERNAL_BANK_URL_WITHDRAW, String.class);
-			L.info("Bofa online response: " + str);
+			String str = rest.getForObject(EXTERNAL_BANK_URL + EXTERNAL_BANK_URL_WITHDRAW + "/" + amount, String.class);
+			L.info("Bofa online withdraw response: " + str);
 		} catch (RestClientException e) {
-			L.error("Rest call to Bofa-online withdraw service failed.");
+			L.error("Rest call to Bofa-online withdraw service failed : RestClientException e = {}", e);
+			throw e;
 		}
+		L.debug("End : AccountServiceImpl.callBofaWithdraw() : amount = {}", amount);
 	}
 }
