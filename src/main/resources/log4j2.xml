@@ -23,12 +23,12 @@
 	</Appenders>
 
 	<Loggers>
-		<AsyncLogger name="com.thehartford.onlineacc" level="debug" additivity="false">
+		<AsyncLogger name="com.synechron.onlineacc" level="debug" additivity="false">
 			<AppenderRef ref="ConsoleAppender" />
 			<AppenderRef ref="FileAppender" />
 		</AsyncLogger>
 
-		<Root level="info">
+		<Root level="debug">
 			<AppenderRef ref="ConsoleAppender" />
 			<AppenderRef ref="FileAppender" />
 		</Root>
