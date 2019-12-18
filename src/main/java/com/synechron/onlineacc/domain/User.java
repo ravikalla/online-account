@@ -168,9 +168,9 @@ public class User implements UserDetails{
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
-                ", appointmentList=" + appointmentList +
-                ", recipientList=" + recipientList +
-                ", userRoles=" + userRoles +
+//                ", appointmentList=" + appointmentList +
+//                ", recipientList=" + recipientList +
+//                ", userRoles=" + userRoles +
                 '}';
     }
 
@@ -203,6 +203,4 @@ public class User implements UserDetails{
     public boolean isEnabled() {
         return enabled;
     }
-
-
 }
