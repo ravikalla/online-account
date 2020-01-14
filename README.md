@@ -61,7 +61,7 @@ sudo chmod 777 /var/run/docker.sock && \
 mkdir -p /jenkins_bkp/jenkins_home && \
 chmod -R 777 /jenkins_bkp && \
 git clone https://github.com/ravikalla/online-account.git && \
-cd online-bank && \
+cd online-account && \
 git checkout master && \
 cp Dockerfile-Jenkins-Maven ../Dockerfile && \
 cd .. && \
