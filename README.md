@@ -69,7 +69,7 @@ docker build -t ravikalla/jenkins-maven-docker:v0.1 .
 ```
 ###### Start Jenkins Server on Docker
 ```
-docker run --detach -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) -p 8888:8888 -p 50000:50000 -v /jenkins_bkp/jenkins_home:/var/jenkins_home ravikalla/jenkins-maven-docker:v0.1
+docker run --detach -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):$(which docker) -p 9080:8080 -p 50000:50000 -v /jenkins_bkp/jenkins_home:/var/jenkins_home ravikalla/jenkins-maven-docker:v0.1
 ```
 ###### Setup "online-bank" project in Jenkins:
  * Login to Jenkins and setup a pipeline project with source code from [Link to OnlineBankAccount GIT repo!](https://github.com/ravikalla/online-account.git)
