@@ -24,6 +24,12 @@ pipeline {
                 sh 'mvn test'
             }
         }
+        stage('Code Quality Check'){
+            steps {
+                echo 'Sonar code quality check'
+                sh 'mvn sonar:sonar'
+            }
+        }
         stage('Build Application'){
             steps {
                 echo 'Building...'
