@@ -27,7 +27,7 @@ pipeline {
         stage('Code Quality Check'){
             steps {
                 echo 'Sonar code quality check'
-                sh 'curl http://localhost:9000'
+                sh 'curl http://sonarqube:9000'
                 echo 'Sonar is available'
                 sh 'mvn sonar:sonar'
             }
