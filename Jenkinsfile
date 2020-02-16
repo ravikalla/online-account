@@ -29,7 +29,7 @@ pipeline {
                 echo 'Sonar code quality check'
                 sh 'curl http://sonarqube:9000'
                 echo 'Sonar is available'
-                sh 'mvn sonar:sonar'
+                sh 'mvn sonar:sonar -Dsonar.host.url=http://sonarqube:9000'
             }
         }
         stage('Build Application'){
