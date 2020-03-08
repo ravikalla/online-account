@@ -2,6 +2,8 @@ pipeline {
     agent any
     parameters {
         string(name: 'MYSQL_ROOT_PASSWORD', defaultValue: 'root', description: 'MySQL password')
+        string(name: 'DOCKER_USER', defaultValue: '', description: 'User ID of the Dockerhub')
+        string(name: 'DOCKER_TOKEN', defaultValue: '', description: 'Token to upload docker image to dockerhub')
     }
     stages {
         stage ("Initialize Jenkins Env") {
@@ -36,20 +38,23 @@ pipeline {
                 sh 'mvn clean install -Dmaven.test.skip=true'
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Upload Docker Image') {
             steps {
                 echo 'Building Docker image'
                 sh 'docker build -t ravikalla/online-account:1 .'
+
+                echo 'Uploading Docker image'
+                sh '''
+                docker tag ravikalla/online-account:1 ravikalla/online-account:1
+                docker login --username=$DOCKER_USER --password=$DOCKER_TOKEN
+                docker push ravikalla/online-account:1
+                '''
             }
         }
        stage('Create Database') {
             steps {
                 echo 'Running Database Image'
 /* Commented as MySQL is replaced by H2
-            //    sh 'docker kill bankmysql 2> /dev/null'
-            //    sh 'docker kill cloudbank 2> /dev/null'
-            //    sh 'docker rm bankmysql 2> /dev/null'
-            //    sh 'docker rm cloudbank 2> /dev/null'
                 sh 'docker stop bankmysql || true && docker rm bankmysql || true'
                 sh 'docker run --detach --name=bankmysql --env="MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}" -p 3306:3306 mysql'
                 sh 'sleep 20'
