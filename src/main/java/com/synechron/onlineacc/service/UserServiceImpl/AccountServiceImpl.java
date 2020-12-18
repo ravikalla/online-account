@@ -2,7 +2,6 @@ package com.synechron.onlineacc.service.UserServiceImpl;
 
 import static com.synechron.onlineacc.util.AppConstants.EXTERNAL_AUDIT_URI_DEPOSIT;
 import static com.synechron.onlineacc.util.AppConstants.EXTERNAL_AUDIT_URI_WITHDRAW;
-import static com.synechron.onlineacc.util.AppConstants.EXTERNAL_AUDIT_URL;
 
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestClientException;
@@ -44,6 +44,9 @@ public class AccountServiceImpl implements AccountService {
     
     @Autowired
     private TransactionService transactionService;
+
+    @Value("${external.audit.url}")
+    private String externalAuditURL;
 
     public PrimaryAccount createPrimaryAccount() {
     		int intAccNum = 0;
@@ -157,23 +160,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
 	private void callBofaDeposit(double amount) {
-		L.debug("Start : AccountServiceImpl.callBofaDeposit() : amount = {}", amount);
+		L.debug("Start : AccountServiceImpl.callBofaDeposit() : amount = {} : externalAuditURL = {}", amount, externalAuditURL);
 		try {
 			RestTemplate rest = new RestTemplate();
-			String strResponse = rest.getForObject(EXTERNAL_AUDIT_URL + EXTERNAL_AUDIT_URI_DEPOSIT + "/" + amount, String.class);
+			String strResponse = rest.getForObject(externalAuditURL + EXTERNAL_AUDIT_URI_DEPOSIT + "/" + amount, String.class);
 			L.info("Bofa online deposit response: " + strResponse);
 		} catch (RestClientException e) {
-			L.error("Rest call to Bofa-online deposit service failed : RestClientException e = {}", e);
+			L.error("Rest call to Bofa-online deposit service failed : externalAuditURL = {}\nRestClientException e = {}", externalAuditURL, e);
 			throw e;
 		}
-		L.debug("End : AccountServiceImpl.callBofaDeposit() : amount = {}", amount);
+		L.debug("End : AccountServiceImpl.callBofaDeposit() : amount = {} : externalAuditURL = {}", amount, externalAuditURL);
 	}
 
 	private void callBofaWithdraw(double amount) {
 		L.debug("Start : AccountServiceImpl.callBofaWithdraw(), amount = {}", amount);
 		try {
 			RestTemplate rest = new RestTemplate();
-			String str = rest.getForObject(EXTERNAL_AUDIT_URL + EXTERNAL_AUDIT_URI_WITHDRAW + "/" + amount, String.class);
+			String str = rest.getForObject(externalAuditURL + EXTERNAL_AUDIT_URI_WITHDRAW + "/" + amount, String.class);
 			L.info("Bofa online withdraw response: " + str);
 		} catch (RestClientException e) {
 			L.error("Rest call to Bofa-online withdraw service failed : RestClientException e = {}", e);

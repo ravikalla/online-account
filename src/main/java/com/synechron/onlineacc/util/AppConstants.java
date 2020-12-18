@@ -23,7 +23,6 @@ public class AppConstants {
 	public static final String URI_TRANSFER_RECEPIENT_DELETE = "/recipient/delete";
 	public static final String URI_TRANSFER_TO_SOMEONE = "/toSomeoneElse";
 
-	public static final String EXTERNAL_AUDIT_URL = "http://localhost:7001";
 	public static final String EXTERNAL_AUDIT_URI_DEPOSIT = "/audit/deposit";
 	public static final String EXTERNAL_AUDIT_URI_WITHDRAW = "/audit/withdraw";
 }

@@ -33,3 +33,5 @@ spring.jpa.properties.hibernate.dialect: org.hibernate.dialect.H2Dialect
 
 # LOG4J Asynchronous logging
 Log4jContextSelector: org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+
+external.audit.url: http://localhost:7001
